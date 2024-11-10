@@ -47,7 +47,7 @@ public class MainApp {
                     bruteForce.decryptByBruteForce(encrypted_file, Cipher.ALPHABET);
                     break;
                 case "0":
-                    return;
+                    break;
                 default:
                     System.out.println("Введена неверная опция");
                     break;
