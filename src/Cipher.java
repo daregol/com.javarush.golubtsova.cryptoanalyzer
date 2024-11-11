@@ -1,21 +1,47 @@
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.nio.file.NoSuchFileException;
 
 public class Cipher {
-    public static char[] ALPHABET = {'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з',
+
+    public static final char[] ALPHABET = {'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з',
             'и','к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
             'ъ', 'ы', 'ь', 'э', 'я', '.', ',', '«', '»', '"', '\'', ':', '!', '?', ' '};
+
+    private char[] alphabet;
     public Cipher(char[] alphabet) {
-        this.ALPHABET = alphabet;
+        this.alphabet = alphabet;
     }
-    public String encrypt(String path, int shift) throws IOException {
+
+    public String encrypt(String text, int shift) {
+        String encrypted = "";
+        for (int i = 0; i < text.length(); i++)
+        {
+            int index = 0;
+            char symbol_str = text.charAt(i);
+            if (symbol_str == '\n') {
+                encrypted += '\n';
+                continue;
+            }
+            for (char symbol_alf : alphabet) {
+                if (symbol_str == symbol_alf) {
+                    index = (index + shift) % alphabet.length;
+                    encrypted += alphabet[index];
+                    break;
+                }
+                index += 1;
+                if(index == alphabet.length) {
+                    break;
+                }
+            }
+        }
+        return encrypted;
+    }
+
+    public String encryptToPath(String path, int shift) throws IOException {
         FileManager fileManager = new FileManager();
         String fromFile = "";
-        if (!Validator.isValidKey(shift, ALPHABET)){
-            shift = shift % ALPHABET.length;
+        if (!Validator.isValidKey(shift, alphabet)){
+            shift = shift % alphabet.length;
         }
 
         try {
@@ -33,37 +59,43 @@ public class Cipher {
         }
         System.out.println("\nЗашифровка...");
         System.out.println("Изначальная строка: " + fromFile);
-        String encrypted = "";
-        for (int i = 0; i < fromFile.length(); i++)
-        {
-            int index = 0;
-            char symbol_str = fromFile.charAt(i);
-            if (symbol_str == '\n') {
-                encrypted += '\n';
-                continue;
-            }
-            for (char symbol_alf : ALPHABET) {
-                if (symbol_str == symbol_alf) {
-                    index = (index + shift) % 40;
-                    encrypted += ALPHABET[index];
-                    break;
-                }
-                index += 1;
-                if(index == ALPHABET.length) {
-                    break;
-                }
-            }
-        }
+        String encrypted = encrypt(fromFile, shift);
         System.out.println("Зашифрованная строка: " + encrypted);
         String way = "C:\\Users\\Дарья\\IdeaProjects\\com.javarush.golubtsova.cryptoanalyzer\\src\\text_en.txt";
         fileManager.writeFile(encrypted, way);
         return fromFile;
     }
-    public String decrypt(String path, int shift) throws IOException {
+
+    public String decrypt(String encryptedText, int shift) {
+        String decrypted = "";
+        for (int i = 0; i < encryptedText.length(); i++)
+        {
+            int index = 0;
+            char symbol_str = encryptedText.charAt(i);
+            if (symbol_str == '\n') {
+                decrypted += '\n';
+                continue;
+            }
+            for (char symbol_alf : alphabet) {
+                if (symbol_str == symbol_alf) {
+                    index = (index + alphabet.length - shift) % alphabet.length;
+                    decrypted += alphabet[index];
+                    break;
+                }
+                index += 1;
+                if(index == alphabet.length) {
+                    break;
+                }
+            }
+        }
+        return decrypted;
+    }
+
+    public String decryptToPath(String path, int shift) throws IOException {
         FileManager fileManager = new FileManager();
         String fromFile = "";
-        if (!Validator.isValidKey(shift, ALPHABET)){
-            shift = shift % ALPHABET.length;
+        if (!Validator.isValidKey(shift, alphabet)){
+            shift = shift % alphabet.length;
         }
 
         try {
@@ -81,27 +113,8 @@ public class Cipher {
         System.out.println("\nРасшифровка...");
         System.out.println("Зашифрованная строка: " + fromFile);
 
-        String decrypted = "";
-        for (int i = 0; i < fromFile.length(); i++)
-        {
-            int index = 0;
-            char symbol_str = fromFile.charAt(i);
-            if (symbol_str == '\n') {
-                decrypted += '\n';
-                continue;
-            }
-            for (char symbol_alf : ALPHABET) {
-                if (symbol_str == symbol_alf) {
-                    index = (index + ALPHABET.length - shift) % ALPHABET.length;
-                    decrypted += ALPHABET[index];
-                    break;
-                }
-                index += 1;
-                if(index == ALPHABET.length) {
-                    break;
-                }
-            }
-        }
+        String decrypted = decrypt(fromFile, shift);
+
         System.out.println("Расшифрованная строка: " + decrypted);
         String way = "C:\\Users\\Дарья\\IdeaProjects\\com.javarush.golubtsova.cryptoanalyzer\\src\\text_de.txt";
         fileManager.writeFile(decrypted, way);
